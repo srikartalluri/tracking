@@ -733,7 +733,8 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"
         #raiseNotDefined()
         
-        
+
+
 
 
         
@@ -758,7 +759,19 @@ class ParticleFilter(InferenceModule):
         gameState.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        #raiseNotDefined()
+
+        c = DiscreteDistribution()
+
+
+
+        print(len(self.particles))
+        for oldPos in self.allPositions:
+            newPostDist = self.getPositionDistribution(gameState,oldPos)
+
+            print(newPostDist)
+
+
         "*** END YOUR CODE HERE ***"
 
 
