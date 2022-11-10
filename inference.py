@@ -739,8 +739,7 @@ class ParticleFilter(InferenceModule):
         
         weights = DiscreteDistribution()
         for p in self.particles:
-            d = manhattanDistance(p, gameState.getPacmanPosition())
-            weights[p] += busters.getObservationProbability(observation, d)
+            weights[p] += self.getObservationProb(observation, gameState.getPacmanPosition(), p, self.getJailPosition())
         
         if weights.total() == 0:
             self.initializeUniformly(gameState)
