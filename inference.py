@@ -737,18 +737,18 @@ class ParticleFilter(InferenceModule):
             self.initializeUniformly(gameState)
             return
         
-        weighted = DiscreteDistribution()
+        weights = DiscreteDistribution()
         for p in self.particles:
             d = manhattanDistance(p, gameState.getPacmanPosition())
-            weighted[p] += busters.getObservationProbability(observation, d)
+            weights[p] += busters.getObservationProbability(observation, d)
         
-        if weighted.total() == 0:
+        if weights.total() == 0:
             self.initializeUniformly(gameState)
             return
         
-        weighted.normalize()
+        weights.normalize()
         for _ in range(self.numParticles):
-            new += [weighted.sample()]
+            new += [weights.sample()]
         self.particles = new
         
         # if (self.getJailPosition() == (1, 1)):
@@ -807,7 +807,10 @@ class JointParticleFilter(ParticleFilter):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        positions = list(itertools.product(self.legalPositions, repeat=self.numGhosts))
+        random.shuffle(positions)
+        for i in range(self.numParticles):
+            self.particles += [positions[i % len(positions)]]
         "*** END YOUR CODE HERE ***"
 
     def addGhostAgent(self, agent):
@@ -843,7 +846,30 @@ class JointParticleFilter(ParticleFilter):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        
+        if observation is None:
+            self.initializeUniformly(gameState)
+            return
+        
+        new = []
+        weights = DiscreteDistribution()
+        
+        for p in self.particles:
+            w = 1.0
+            for i in range(self.numGhosts):
+                w *= self.getObservationProb(observation[i], gameState.getPacmanPosition(), p[i], self.getJailPosition(i))
+            weights[p] += w
+        weights.normalize()
+        
+        if weights.total() == 0:
+            self.initializeUniformly(gameState)
+            return
+        
+        for _ in range(self.numParticles):
+            new += [weights.sample()]
+        
+        self.particles = new
+        
         "*** END YOUR CODE HERE ***"
 
     ########### ########### ###########
@@ -861,7 +887,11 @@ class JointParticleFilter(ParticleFilter):
 
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
-            raiseNotDefined()
+            
+            for i in range(self.numGhosts):
+                newPosDist = self.getPositionDistribution(gameState, oldParticle, i, self.ghostAgents[i])
+                newParticle[i] = newPosDist.sample()
+            
             """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
